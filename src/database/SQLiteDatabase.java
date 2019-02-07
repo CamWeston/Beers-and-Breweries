@@ -3,6 +3,10 @@ package database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Set;
  
 /**
  *
@@ -11,10 +15,18 @@ import java.sql.SQLException;
 public class SQLiteDatabase {
 	
 	private final String dbFilePath = "jdbc:sqlite:warmup.db";
-	
+	private Dictionary<String,String> commands = new Hashtable<String,String> ();
+
 	
 	public SQLiteDatabase(){
+		constructCommands();
 		connect();
+	}
+	
+	private void constructCommands(){
+		commands.put("exit", "Exit the program");
+		commands.put("beers", "Return a list of all beers");
+		commands.put("breweries", "Return a list of all breweries");
 	}
 	
 	private String getDbFilePath(){
@@ -41,5 +53,13 @@ public class SQLiteDatabase {
                 System.out.println(ex.getMessage());
             }
         }
+    }
+    
+    public void help(){
+    	System.out.println("Commands:");
+    	Enumeration<String> keys = commands.keys();
+    	while(keys.hasMoreElements()){
+    		System.out.println(keys.nextElement());
+    	}
     }
 }
