@@ -2,11 +2,12 @@ package database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Dictionary;
+import java.sql.Statement;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
  
 /**
  *
@@ -15,12 +16,11 @@ import java.util.Set;
 public class SQLiteDatabase {
 	
 	private final String dbFilePath = "jdbc:sqlite:warmup.db";
-	private Dictionary<String,String> commands = new Hashtable<String,String> ();
+	public Map<String,String> commands = new HashMap<String,String> ();
 
 	
 	public SQLiteDatabase(){
 		constructCommands();
-		connect();
 	}
 	
 	private void constructCommands(){
@@ -29,37 +29,54 @@ public class SQLiteDatabase {
 		commands.put("breweries", "Return a list of all breweries");
 	}
 	
-	private String getDbFilePath(){
-		return dbFilePath;
-	}
-	
-    private void connect() {
+    private Connection connect() {
         Connection conn = null;
         try {
       
             // create a connection to the database
-            conn = DriverManager.getConnection(getDbFilePath());
+            conn = DriverManager.getConnection(dbFilePath);
             
             System.out.println("Connection to beers and breweries database established.");
             
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
-            }
-        }
+        } 
+        return conn;
+    }
+    
+    private boolean closeConnection(Connection conn){
+    	try{
+    		conn.close();
+    		return true;
+    	}
+    	catch(SQLException e){
+    		System.out.println(e);
+    		return false;
+    	}
     }
     
     public void help(){
-    	System.out.println("Commands:");
-    	Enumeration<String> keys = commands.keys();
-    	while(keys.hasMoreElements()){
-    		System.out.println(keys.nextElement());
+    	for(Map.Entry<String,String> command : commands.entrySet()){
+    		System.out.println(command.getKey() + " : " + command.getValue());
     	}
+    }
+    
+    public void allBeers(){
+    	 String sql = "SELECT Beer.name, Beer.abv, Beer.description, Brewery.name FROM Beer "
+    	 			+ "JOIN BREWERY ON Beer.brewery_id == Brewery.id "
+    	 			+ "ORDER BY Brewery.name";
+
+         
+         try (Connection conn = this.connect();
+              Statement query  = conn.createStatement();
+              ResultSet results    = query.executeQuery(sql)){
+             
+             // loop through the result set
+             while (results.next()) {
+                 System.out.println(results);
+             }
+         } catch (SQLException e) {
+             System.out.println(e.getMessage());
+         }
     }
 }
