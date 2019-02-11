@@ -1,9 +1,5 @@
 # Git Ignore 
 
 *.DS_Store
-*.classpath
-*.project
-bin/
-.settings/
 
  
