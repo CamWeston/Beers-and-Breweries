@@ -6,15 +6,18 @@ import database.SQLiteDatabase;
 //In this class we will control user interactions 
 
 public class InputRunner {
+	//Database obj passed in during constructor
 	private SQLiteDatabase db;
+	//Scanner for user input of commands
 	private final Scanner userInput = new Scanner(System.in);
 	
-	
+	//Constructor
 	public InputRunner(SQLiteDatabase database){
 		db = database;
 		run();
 	}	
 	
+	//Execute main loop
 	private void run(){
 		String currentCommand = "";
 		while(!currentCommand.toLowerCase().equals("exit")){
@@ -24,6 +27,7 @@ public class InputRunner {
 		}
 	}
 	
+	//Control board to decide which db func to run
 	private void userController(String command){
 		command = command.toLowerCase();
 		
