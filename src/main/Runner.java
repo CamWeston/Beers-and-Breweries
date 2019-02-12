@@ -5,7 +5,7 @@ import userInput.InputRunner;
 
 /** 
  * @author CamWeston
- *
+ *			Jordan Genovese
  *	Client Deployment Class
  * 
  */
