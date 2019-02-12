@@ -14,6 +14,7 @@ import java.util.Map;
  * 
  * In this class we will be connecting to our SQLite database and executing our queries
  */
+
 public class SQLiteDatabase {
 	//If debug == true than output all error messages and control messages
 	private final boolean debug = true;
@@ -98,7 +99,40 @@ public class SQLiteDatabase {
          catch (SQLException e) {
         	 if(debug) System.out.println("Error running all beers query.");
         	 if(debug) System.out.println(e.getMessage());    
-         }
-        
+         }    
     }
+    //Cam Weston 2/11 WIP 
+    //TODO: Implement this method for brewery commands
+    public void allBreweries(){
+   	 String sql = "SELECT name, address1, address2,"
+   	 		+ " city, state, description FROM Brewery";
+
+        String breweryName, address1, address2, city, state, description;
+
+        try (Connection conn = this.connect();
+             Statement query  = conn.createStatement();
+             ResultSet results    = query.executeQuery(sql)){
+            
+            // loop through the result set and output in print function
+       	 // TODO: Find a cleaner way to printout our data
+            while (results.next()) {
+           	breweryName = results.getString(1); 
+           	address1 = results.getString(2); 
+           	address2 = results.getString(3); 
+           	city = results.getString(4); 
+           	state = results.getString(5); 
+           	description = results.getString(6); 
+
+           	
+               System.out.println(breweryName + " " + address1 + " " + address2 + " " + city + "  " + state + " " + description);
+            }
+            if(debug) System.out.println("Successfully finished breweries query");
+        }
+        catch (SQLException e) {
+       	 if(debug) System.out.println("Error running all breweries query.");
+       	 if(debug) System.out.println(e.getMessage());    
+        }    
+   }
+    
+    
 }
