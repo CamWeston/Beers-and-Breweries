@@ -7,6 +7,7 @@ import userInput.InputRunner;
  * @author CamWeston
  *			Jordan Genovese
  *			Jonathan Leventhal
+ *			Jing lu
  *	Client Deployment Class
  * 
  */
