@@ -31,8 +31,8 @@ public class SQLiteDatabase {
 	//Create hashmap of commands for help 
 	private void constructCommands(){
 		commands.put("exit", "Exit the program");
-		commands.put("beers", "Return a list of all beers");
-		commands.put("breweries", "Return a list of all breweries");
+		commands.put("allbeers", "Return a list of all beers");
+		commands.put("allbreweries", "Return a list of all breweries");
 	}
 	
 	//Connection class to connect to our db
@@ -51,19 +51,7 @@ public class SQLiteDatabase {
         } 
         return conn;
     }
-    
-    //Close connection class 
-    private boolean closeConnection(Connection conn){
-    	try{
-    		conn.close();
-    		return true;
-    	}
-    	catch(SQLException e){
-    		System.out.println(e);
-    		return false;
-    	}
-    }
-    
+  
     //Output all commands available to user
     public void help(){
     	for(Map.Entry<String,String> command : commands.entrySet()){
@@ -101,8 +89,9 @@ public class SQLiteDatabase {
         	 if(debug) System.out.println(e.getMessage());    
          }    
     }
-    //Cam Weston 2/11 WIP 
-    //TODO: Implement this method for brewery commands
+    
+    //Output all breweries 
+    //TODO: Add count of beers associated with 
     public void allBreweries(){
    	 String sql = "SELECT name, address1, address2,"
    	 		+ " city, state, description FROM Brewery";

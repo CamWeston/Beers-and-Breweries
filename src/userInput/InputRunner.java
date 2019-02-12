@@ -34,8 +34,11 @@ public class InputRunner {
 		if(command.equals("help")){
 			db.help();
 		}
-		else if(command.equals("beers")){
+		else if(command.equals("allbeers")){
 			db.allBeers();	
+		}
+		else if(command.equals("allbreweries")){
+			db.allBreweries();	
 		}
 		else if(command.toLowerCase().equals("exit")){
 			System.out.println("Goodbye!");
