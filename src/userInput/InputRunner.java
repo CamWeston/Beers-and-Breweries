@@ -1,6 +1,7 @@
 package userInput;
 
 import java.util.Scanner;
+import java.util.Arrays;
 
 import database.SQLiteDatabase;
 //In this class we will control user interactions 
@@ -26,24 +27,74 @@ public class InputRunner {
 			userController(currentCommand);
 		}
 	}
+	private boolean handleComplexCommand(String command) {
+		command = command.trim();
+		String commandLC = command.toLowerCase();
+		String[] subcommandLC = commandLC.split(" ");
+		String[] subcommand = command.split(" ");
+		if(subcommand.length<3)
+			return false;
+		
+		if(subcommandLC[0].equals("brewery")||subcommandLC[0].equals("beer")) {
+			if(subcommandLC[1].equals("name") || subcommandLC[1].equals("state")) {
+				String[] attribute = {subcommandLC[1].trim()};
+				String[] name = {String.join(" ", Arrays.copyOfRange(subcommand, 2, subcommand.length))};
+				db.complexSearch(subcommandLC[0],attribute, name);
+				return true;
+			}
+			else if(subcommandLC[1].equals("city")) {
+
+				int state = -1;
+				
+				for(int i=1; i<subcommandLC.length; i++) {
+					if(subcommandLC[i].equals("state")) {
+						state = i;
+						break;
+					}
+				}
+				if(state!=-1) {
+					String[] attribute = {subcommandLC[1].trim(), subcommandLC[state].trim()};
+					String[] name = {
+							String.join(" ", Arrays.copyOfRange(subcommand, 2, state)),
+							String.join(" ", Arrays.copyOfRange(subcommand, state+1, subcommand.length))};
+					db.complexSearch(subcommandLC[0], attribute, name);
+					return true;
+				}
+				else {
+					String[] attribute = {subcommandLC[1].trim()};
+					String[] name = {String.join(" ", Arrays.copyOfRange(subcommand, 2, subcommand.length))};
+					db.complexSearch(subcommandLC[0],attribute, name);
+					return true;
+				}
+			}
+		}
+		else if(subcommandLC[0].equals("abv")) {
+			if(subcommandLC[1].equals("beer") || subcommandLC[1].equals("brewery")) {
+				db.abvSearch(subcommandLC[1], String.join(" ", Arrays.copyOfRange(subcommand, 2, subcommand.length)));
+				return true;
+			}
+		}
+		return false;
+	}
+
 	
 	//Control board to decide which db func to run
 	private void userController(String command){
-		command = command.toLowerCase();
+		String commandLC = command.toLowerCase();
 		
-		if(command.equals("help")){
+		if(commandLC.equals("help")){
 			db.help();
 		}
-		else if(command.equals("allbeers")){
+		else if(commandLC.equals("allbeers")){
 			db.allBeers();	
 		}
-		else if(command.equals("allbreweries")){
+		else if(commandLC.equals("allbreweries")){
 			db.allBreweries();	
 		}
-		else if(command.toLowerCase().equals("exit")){
+		else if(commandLC.equals("exit")){
 			System.out.println("Goodbye!");
 		}
-		else{
+		else if(handleComplexCommand(command)==false){
 			System.out.println("Command not found (typer 'help' for a list of commands)");
 		}
 	}
