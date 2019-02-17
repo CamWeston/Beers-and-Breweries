@@ -36,7 +36,16 @@ public class InputRunner {
 			return false;
 		
 		if(subcommandLC[0].equals("brewery")||subcommandLC[0].equals("beer")) {
-			if(subcommandLC[1].equals("name") || subcommandLC[1].equals("state")) {
+			if(subcommandLC[1].equals("breweryname") || subcommandLC[1].equals("beername")) {
+				//'name' will be assigned to attribute, as the user will search
+				//'beer brewery name <brewery name>', for example
+				String[] attribute = {"name"};
+				//The user entered name of the Brewery will be assigned to name
+				String[] name = {String.join(" ", Arrays.copyOfRange(subcommand, 2, subcommand.length))};
+				db.complexSearch(subcommandLC[1], attribute, name);
+				return true;
+			}
+			else if(subcommandLC[1].equals("name") || subcommandLC[1].equals("state") || subcommandLC[1].equals("description")){
 				String[] attribute = {subcommandLC[1].trim()};
 				String[] name = {String.join(" ", Arrays.copyOfRange(subcommand, 2, subcommand.length))};
 				db.complexSearch(subcommandLC[0],attribute, name);
