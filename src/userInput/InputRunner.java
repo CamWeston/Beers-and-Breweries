@@ -45,7 +45,7 @@ public class InputRunner {
 				db.complexSearch(subcommandLC[1], attribute, name);
 				return true;
 			}
-			else if(subcommandLC[1].equals("name") || subcommandLC[1].equals("state") || subcommandLC[1].equals("description")){
+			else if(subcommandLC[1].equals("name") || subcommandLC[1].equals("state") || subcommandLC[1].equals("desc")){
 				String[] attribute = {subcommandLC[1].trim()};
 				String[] name = {String.join(" ", Arrays.copyOfRange(subcommand, 2, subcommand.length))};
 				db.complexSearch(subcommandLC[0],attribute, name);

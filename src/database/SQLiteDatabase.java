@@ -37,13 +37,15 @@ public class SQLiteDatabase {
 		commands.put("brewery beer name (beerName)", "\tReturn brewery by a specific beer");
 		commands.put("brewery city (cityName)", "\tReturn a list of all breweries by city name");
 		commands.put("brewery state (stateName)", "\tReturn a list of all breweries by state name");
-		commands.put("brewery city (cityName)	state (stateName)", "Return a list of all breweries by city and state name");
+		commands.put("brewery city (cityName)	state (stateName)", "\t\tReturn a list of all breweries by city and state name");
+		commands.put("brewery desc (any input)", "\tReturn a list of breweries with the description containing your input");
 		
 		commands.put("beer breweryname (breweryName)", "\tReturn a list of all beers by brewery name");
 		commands.put("beer name (breweryName)", "\tReturn a list of all beers by name");
 		commands.put("beer state (stateName)", "\t\tReturn a list of all beers by state name");
 		commands.put("beer city (cityName)", "\t\tReturn a list of all beers by city name");
-		commands.put("beer city (cityName) state (stateName)", "Return a list of all beers by city and state name");
+		commands.put("beer city (cityName) state (stateName)", "\t\tReturn a list of all beers by city and state name");
+		commands.put("beer desc (any input)", "\t\tReturn a list of beers with the description containing your input");
 		
 		commands.put("abv beer (beerName)", "\t\tReturn abv by beer name");
 		commands.put("abv brewery (breweryName)", "\tReturn abv by brewery name");
@@ -99,21 +101,41 @@ public class SQLiteDatabase {
 	public void brewerySearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
-		for(int i=0; i<attribute.length; i++) {
-			newName = name[i].replaceAll("'", "''");
-			if(i==0)
-				condition += String.format("%s=='%s'", attribute[i], newName);
-			else
-				condition += String.format("and %s=='%s'", attribute[i], newName);
+		
+		
+		if(attribute[0].equals("desc")) {
+			for(int i = 0; i<name.length; i++) {
+				name[i].trim();
+				newName = "%" +name[i] + "%";
+				String a = "description";
+				if(i == 0)
+					condition += String.format("%s LIKE  '%s'", a, newName);
+				else
+					condition += String.format("and %s LIKE '%s'", a, newName);
+			}
+			String sql = String.format("SELECT * FROM BREWERY WHERE %s", condition);
+		     getResult(sql, 8);
+			
 		}
-		//System.out.println(condition);
-		String sql = String.format("SELECT * FROM BREWERY WHERE %s;", condition);
-		getResult(sql, 8);
+		else {
+			for(int i=0; i<attribute.length; i++) {
+				newName = name[i].replaceAll("'", "''");
+				if(i==0)
+					condition += String.format("%s=='%s'", attribute[i], newName);
+				else
+					condition += String.format("and %s=='%s'", attribute[i], newName);
+			}
+			//System.out.println(condition);
+			String sql = String.format("SELECT * FROM BREWERY WHERE %s;", condition);
+			getResult(sql, 8);
+		}
 	}
 	
 	public void beerBreweryNameSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
+		
+		
 		for(int i=0; i<attribute.length; i++) {
 			newName = name[i].replaceAll("'", "''");
 			if(i==0)
@@ -131,16 +153,36 @@ public class SQLiteDatabase {
 	public void beerSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
-		for(int i=0; i<attribute.length; i++) {
-			newName = name[i].replaceAll("'", "''");
-			if(i==0)
-				condition += String.format("%s=='%s'", attribute[i], newName);
-			else
-				condition += String.format("and %s=='%s'", attribute[i], newName);
+		
+		if(attribute[0].equals("desc")) {
+			for(int i = 0; i<name.length; i++) {
+				name[i].trim();
+				newName = "%" +name[i] + "%";
+				String a = "description";
+				if(i == 0)
+					condition += String.format("%s LIKE  '%s'", a, newName);
+				else
+					condition += String.format("and %s LIKE '%s'", a, newName);
+			}
+			String sql = String.format("SELECT * FROM BEER WHERE %s", condition);
+		     getResult(sql, 5);
+		
+			
+			
 		}
-		String sql = String.format("SELECT * FROM BEER "
-				+ "WHERE %s", condition);
-	     getResult(sql, 5);
+		else {
+		
+			for(int i=0; i<attribute.length; i++) {
+				newName = name[i].replaceAll("'", "''");
+				if(i==0)
+					condition += String.format("%s=='%s'", attribute[i], newName);
+				else
+					condition += String.format("and %s=='%s'", attribute[i], newName);
+			}
+			String sql = String.format("SELECT * FROM BEER "
+					+ "WHERE %s", condition);
+		     getResult(sql, 5);
+		}
 	}
 	
 	public void complexSearch(String type, String[] attribute, String[] name) {
