@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
  
@@ -75,6 +77,7 @@ public class SQLiteDatabase {
     		System.out.println(command.getKey() + " : " + command.getValue());
     	}
     }
+    
     public void getResult (String sql, int numObject){
     	
 	     boolean find = false;
@@ -213,29 +216,23 @@ public class SQLiteDatabase {
     	 String sql = "SELECT Beer.name, Beer.abv, Brewery.name FROM Beer "
     	 			+ "JOIN BREWERY ON Beer.brewery_id == Brewery.id "
     	 			+ "ORDER BY Brewery.name";
-
-         String beerName, breweryName;
-         float beerABV;
-         
-        
+    	 final int columnCount = 3;
+         ArrayList<String> columns = new ArrayList<>(Arrays.asList("Beer Name","ABV","Brewery Name"));
+         ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
+         ArrayList<String> row = new ArrayList<>();
          try (Connection conn = this.connect();
               Statement query  = conn.createStatement();
               ResultSet results    = query.executeQuery(sql)){
              
              // loop through the result set and output in print function
-        	 // TODO: Find a cleaner way to printout our data
              while (results.next()) {
-            	for(int i=1; i<=3; i++)
-             		System.out.print(results.getObject(i)+" ");
-             	System.out.println();
-             	//original output
-            	/*beerName = results.getString(1); 
-            	beerABV = results.getFloat(2); 
-            	breweryName = results.getString(3); 
-            	
-                System.out.println(beerName + " " + beerABV + " " + breweryName);
-                */
+            	for(int i=1; i<=columnCount; i++) {
+            		row.add(String.valueOf(results.getObject(i)));
+            	}
+            	rows.add(row);
+            	row = new ArrayList<String>();
              }
+             printTable(columns,rows);
              if(debug) System.out.println("Successfully finished beers query");
          }
          catch (SQLException e) {
@@ -244,37 +241,34 @@ public class SQLiteDatabase {
          }    
     }
     
-    //Output all breweries 
-    //TODO: Add count of beers associated with 
+    /**
+     * @author Cam Weston
+     * 
+     * Print all breweries
+     * 
+     */
     public void allBreweries(){
-   	 String sql = "SELECT b1.id, b1.name, b1.address1, b1.address2,"
+   	 
+    	String sql = "SELECT b1.name, b1.address1, b1.address2,"
     	 		+ " b1.city, b1.state, b1.description, count(*) FROM Brewery b1"
        	 		+ " left join beer on beer.brewery_id == b1.id group by b1.id";
-
-        //String breweryName, address1, address2, city, state, description;
+    	
+    	final int columnCount = 7;
+    	ArrayList<String> columns = new ArrayList<>(Arrays.asList("Brewery Name","Address 1","Address 2","City","State","Description","Number of Beers"));
+        ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
+        ArrayList<String> row = new ArrayList<>();
 
         try (Connection conn = this.connect();
              Statement query  = conn.createStatement();
              ResultSet results    = query.executeQuery(sql)){
             
             // loop through the result set and output in print function
-       	 // TODO: Find a cleaner way to printout our data
             while (results.next()) {
-            	for(int i=1; i<=8; i++)
-            		System.out.print(results.getObject(i)+" ");
-            	System.out.println();
-            //original output
-           	/*breweryName = results.getString(1); 
-           	address1 = results.getString(2); 
-           	address2 = results.getString(3); 
-           	city = results.getString(4); 
-           	state = results.getString(5); 
-           	description = results.getString(6); 
-
-           	
-               System.out.println(breweryName + " " + address1 + " " + address2 + " " + city + "  " + state + " " + description);
-               */
+            	for(int i=1; i<=columnCount; i++) row.add(String.valueOf(results.getObject(i)));
+            	rows.add(row);
+            	row = new ArrayList<String>();
             }
+            printTable(columns,rows);
             if(debug) System.out.println("Successfully finished breweries query");
         }
         catch (SQLException e) {
@@ -282,6 +276,83 @@ public class SQLiteDatabase {
        	 if(debug) System.out.println(e.getMessage());    
         }    
    }
+    
+    /**
+     * @author Cam Weston
+     * 
+     * Dynamically create and print a table for the given data
+     * 
+     * Pass in the column names and table rows and create a dynamically sized output table
+     */
+    private void printTable(ArrayList<String> columns, ArrayList<ArrayList<String>> rows) {
+    	try {
+	    	//Iterate through rows and get longest in each to column to see how big to set your tab space for printf
+	    	ArrayList<String> columnLengths = new ArrayList<>();
+	    	int currentColumn = 0;
+	    	int hyphensToPrint =0;
+	    	//Start max at name of column because column data length may be less than column name ie ("ABV" = 3 and "1" = 1)
+	    	int max=columns.get(currentColumn).length();
+	    	for(int i=0; i <columns.size();i++) {
+	    		for(int j=0; j<rows.size();j++) {
+	    			if(rows.get(j).get(i).length() > max) {
+	    				max = rows.get(j).get(i).length();
+	    			}
+	    		}
+	    		hyphensToPrint += max + 5;
+	    		//Create format string and add 5 to max column width to evenly space things
+	    		columnLengths.add(new String("%-" + String.valueOf(max+5) + "s"));
+	    		//Only reassign our max column width while still in index bounds 
+	    		if(currentColumn<columns.size()-1) {
+	    			currentColumn+=1;
+	        		max=columns.get(currentColumn).length();
+	    		}
+	    	}
+	    	//Print hyphens for roof of table
+	    	for(int i=0; i <hyphensToPrint; i++) {
+	    		System.out.print("-");
+	    	}
+	    	System.out.println();
+	    	
+	    	//Print each column name
+	    	for(int i=0; i<columnLengths.size();i++) {
+	    		System.out.printf(columnLengths.get(i), columns.get(i));
+	    	}
+	    	System.out.println();
+	    	
+	    	//Print hyphens for floor of columns
+	    	for(int i=0; i <hyphensToPrint; i++) {
+	    		System.out.print("-");
+	    	}
+	    	System.out.println();
+	    	
+	    	//Print each row using the right column length
+	    	for(ArrayList<String> row : rows) {
+	    		for(int i=0; i < row.size();i++) {
+	    			System.out.printf(columnLengths.get(i),row.get(i));
+	    		}
+	    			System.out.println();
+	    	}
+	    	if(debug)System.out.println("Finished printing table");
+    	}
+    	catch(Exception e) {
+    		System.out.println("Failed to print table");
+    		if(debug)System.out.println(e);
+    	}
+    }
+    
+    /**
+     * @author Cam Weston
+     * Test print table function
+     */
+    private void testPrintTable() {
+    	ArrayList<String> testColumns = new ArrayList<>(Arrays.asList("Test1","Test2","Test3"));
+		ArrayList<ArrayList<String>> testRows = new ArrayList<>();
+		ArrayList<String> testRow1 = new ArrayList<>(Arrays.asList("baddadbing","less","fofossdsdsdfsdfsdfsfs"));
+		ArrayList<String> testRow2 = new ArrayList<>(Arrays.asList("babing","lss","sdsdsdfsdfsdfsfs"));
+		ArrayList<String> testRow3 = new ArrayList<>(Arrays.asList("baddadbing","less","fofossdsdsdfsdfsdfsfs"));
+		testRows.addAll(Arrays.asList(testRow1,testRow2,testRow3));
+		printTable(testColumns,testRows);
+    }
     
     
 }
