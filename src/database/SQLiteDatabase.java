@@ -33,7 +33,7 @@ public class SQLiteDatabase {
 
 	// Create hashmap of commands for help
 	private void constructCommands() {
-		commands.put("exit", "\t\t\t\tExit the program");
+		commands.put("exit", "\t\t\t\tExit the programw");
 		commands.put("allbeers", "\t\t\tReturn a list of all beers");
 		commands.put("allbreweries", "\t\t\tReturn a list of all breweries");
 
