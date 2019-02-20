@@ -33,27 +33,26 @@ public class SQLiteDatabase {
 
 	// Create hashmap of commands for help
 	private void constructCommands() {
-		commands.put("exit", "\t\t\t\tExit the programw");
-		commands.put("allbeers", "\t\t\tReturn a list of all beers");
-		commands.put("allbreweries", "\t\t\tReturn a list of all breweries");
-
-		commands.put("brewery beer name (beerName)", "\tReturn brewery by a specific beer");
-		commands.put("brewery city (cityName)", "\tReturn a list of all breweries by city name");
-		commands.put("brewery state (stateName)", "\tReturn a list of all breweries by state name");
+		commands.put("exit", "Exit the program");
+		commands.put("allbeers", "Return a list of all beers");
+		commands.put("allbreweries", "Return a list of all breweries");
+		commands.put("brewery beer name (beerName)", "Return brewery by a specific beer");
+		commands.put("brewery city (cityName)", "Return a list of all breweries by city name");
+		commands.put("brewery state (stateName)", "Return a list of all breweries by state name");
 		commands.put("brewery city (cityName)	state (stateName)",
-				"\t\tReturn a list of all breweries by city and state name");
+				"Return a list of all breweries by city and state name");
 		commands.put("brewery desc (any input)",
-				"\tReturn a list of breweries with the description containing your input");
+				"Return a list of breweries with the description containing your input");
 
-		commands.put("beer breweryname (breweryName)", "\tReturn a list of all beers by brewery name");
-		commands.put("beer name (breweryName)", "\tReturn a list of all beers by name");
-		commands.put("beer state (stateName)", "\t\tReturn a list of all beers by state name");
-		commands.put("beer city (cityName)", "\t\tReturn a list of all beers by city name");
-		commands.put("beer city (cityName) state (stateName)", "\t\tReturn a list of all beers by city and state name");
-		commands.put("beer desc (any input)", "\t\tReturn a list of beers with the description containing your input");
+		commands.put("beer breweryname (breweryName)", "Return a list of all beers by brewery name");
+		commands.put("beer name (breweryName)", "Return a list of all beers by name");
+		commands.put("beer state (stateName)", "Return a list of all beers by state name");
+		commands.put("beer city (cityName)", "Return a list of all beers by city name");
+		commands.put("beer city (cityName) state (stateName)", "Return a list of all beers by city and state name");
+		commands.put("beer desc (any input)", "Return a list of beers with the description containing your input");
 
-		commands.put("abv beer (beerName)", "\t\tReturn abv by beer name");
-		commands.put("abv brewery (breweryName)", "\tReturn abv by brewery name");
+		commands.put("abv beer (beerName)", "Return abv by beer name");
+		commands.put("abv brewery (breweryName)", "Return abv by brewery name");
 
 	}
 
@@ -79,11 +78,18 @@ public class SQLiteDatabase {
 
 	// Output all commands available to user
 	public void help() {
+		ArrayList<String> columns = new ArrayList<>(
+				Arrays.asList("Command", "Description"));
+		ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
+		ArrayList<String> row = new ArrayList<>();
 		for (Map.Entry<String, String> command : commands.entrySet()) {
-			System.out.println(command.getKey() + " : " + command.getValue());
+			row.addAll(Arrays.asList(command.getKey(),command.getValue()));
+			rows.add(row);
+			row = new ArrayList<>();
 		}
+		printTable(columns,rows);
 	}
-
+	
 	public void getResult(ArrayList<String> columns, String sql) {
 		final int columnCount = columns.size();
 		ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
@@ -102,7 +108,7 @@ public class SQLiteDatabase {
 			if (!find)
 				System.out.println("data not found.");
 			else {
-				printTable(columns,rows);
+				printTable(columns, rows);
 				if (debug)
 					System.out.println("Successfully finished query");
 			}
@@ -117,7 +123,8 @@ public class SQLiteDatabase {
 	public void brewerySearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
-		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Name","Address 1","Address 2","City","State","Description"));
+		ArrayList<String> columns = new ArrayList<>(
+				Arrays.asList("Name", "Address 1", "Address 2", "City", "State", "Description"));
 		if (attribute[0].equals("desc")) {
 			for (int i = 0; i < name.length; i++) {
 				name[i].trim();
@@ -128,7 +135,8 @@ public class SQLiteDatabase {
 				else
 					condition += String.format("and %s LIKE '%s'", a, newName);
 			}
-			String sql = String.format("SELECT name, address1, address2, city, state, description FROM BREWERY WHERE %s", condition);
+			String sql = String.format(
+					"SELECT name, address1, address2, city, state, description FROM BREWERY WHERE %s", condition);
 			getResult(columns, sql);
 
 		} else {
@@ -140,7 +148,8 @@ public class SQLiteDatabase {
 					condition += String.format("and %s=='%s'", attribute[i], newName);
 			}
 			// System.out.println(condition);
-			String sql = String.format("SELECT name, address1, address2, city, state, description FROM BREWERY WHERE %s;", condition);
+			String sql = String.format(
+					"SELECT name, address1, address2, city, state, description FROM BREWERY WHERE %s;", condition);
 			getResult(columns, sql);
 		}
 	}
@@ -156,16 +165,16 @@ public class SQLiteDatabase {
 			else
 				condition += String.format("and Brewery.%s=='%s'", attribute[i], newName);
 		}
-		String sql = String.format(
-				"SELECT Beer.name, abv, Brewery.name FROM BEER " + "JOIN BREWERY ON Beer.brewery_id == Brewery.id " + "WHERE %s", condition);
-		getResult(columns,sql);
+		String sql = String.format("SELECT Beer.name, abv, Brewery.name FROM BEER "
+				+ "JOIN BREWERY ON Beer.brewery_id == Brewery.id " + "WHERE %s", condition);
+		getResult(columns, sql);
 
 	}
 
 	public void beerSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
-		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Name","ABV","Description"));
+		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Name", "ABV", "Description"));
 		if (attribute[0].equals("desc")) {
 			for (int i = 0; i < name.length; i++) {
 				name[i].trim();
@@ -177,7 +186,7 @@ public class SQLiteDatabase {
 					condition += String.format("and %s LIKE '%s'", a, newName);
 			}
 			String sql = String.format("SELECT name, abv, description FROM BEER WHERE %s", condition);
-			getResult(columns,sql);
+			getResult(columns, sql);
 
 		} else {
 
@@ -189,7 +198,7 @@ public class SQLiteDatabase {
 					condition += String.format("and %s=='%s'", attribute[i], newName);
 			}
 			String sql = String.format("SELECT name, abv, description FROM BEER " + "WHERE %s", condition);
-			getResult(columns,sql);
+			getResult(columns, sql);
 		}
 	}
 
@@ -205,7 +214,7 @@ public class SQLiteDatabase {
 
 	public void abvSearch(String tableName, String name) {
 		String sql;
-		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Beer Name","ABV"));
+		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Beer Name", "ABV"));
 		if (tableName.equals("beer"))
 			sql = String.format(
 					"SELECT BEER.id, BEER.brewery_id, BEER.abv, BEER.name FROM BEER " + "WHERE %s.name = '%s'",
@@ -215,13 +224,13 @@ public class SQLiteDatabase {
 					"SELECT BEER.id, BEER.brewery_id, BEER.abv, BEER.name FROM BEER "
 							+ "JOIN BREWERY ON Beer.brewery_id == Brewery.id " + "WHERE %s.name = '%s'",
 					tableName, name);
-		getResult(columns,sql);
+		getResult(columns, sql);
 	}
 
 	/**
 	 * @author Cam Weston
 	 * 
-	 * Print all beers with there respective breweries
+	 *         Print all beers with there respective breweries
 	 */
 	public void allBeers() {
 		String sql = "SELECT Beer.name, Beer.abv, Brewery.name FROM Beer "
@@ -256,7 +265,7 @@ public class SQLiteDatabase {
 	/**
 	 * @author Cam Weston
 	 * 
-	 * Print all breweries
+	 *         Print all breweries
 	 * 
 	 */
 	public void allBreweries() {
