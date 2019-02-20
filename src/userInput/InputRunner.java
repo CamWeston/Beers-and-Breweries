@@ -132,7 +132,7 @@ public class InputRunner {
 			System.out.println("Goodbye!");
 		}
 		else if(handleComplexCommand(command)==false){
-			System.out.println("Command not found (typer 'help' for a list of commands)");
+			System.out.println("Command not found (type 'help' for a list of commands)");
 		}
 	}
 }
