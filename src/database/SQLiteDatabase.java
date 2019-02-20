@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class SQLiteDatabase {
 	// If debug == true than output all error messages and control messages
-	private final boolean debug = true;
+	private final boolean debug = false;
 	// Path to beers and breweries database
 	private final String dbFilePath = "jdbc:sqlite:src/database/warmup.db";
 	// Hashmap of all commands for user. Used in help method
@@ -31,7 +31,7 @@ public class SQLiteDatabase {
 		constructCommands();
 	}
 
-	// Create hashmap of commands for help
+	// Hashmap of commands for help
 	private void constructCommands() {
 		commands.put("exit", "Exit the program");
 		commands.put("allbeers", "Return a list of all beers");
@@ -88,7 +88,8 @@ public class SQLiteDatabase {
 		}
 		printTable(columns, rows);
 	}
-
+	
+	//Queries to the DB based upon what is passed into the function
 	public void getResult(ArrayList<String> columns, String sql) {
 		final int columnCount = columns.size();
 		ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
@@ -118,12 +119,16 @@ public class SQLiteDatabase {
 				System.out.println(e.getMessage());
 		}
 	}
-
+	
+	
+	//Queries based upon a brewery search input (No joins with BEER tables)
 	public void brewerySearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
 		ArrayList<String> columns = new ArrayList<>(
 				Arrays.asList("Name", "Address 1", "Address 2", "City", "State", "Description"));
+		
+		//Handler if the user is searching by description key words
 		if (attribute[0].equals("desc")) {
 			for (int i = 0; i < name.length; i++) {
 				name[i].trim();
@@ -138,7 +143,9 @@ public class SQLiteDatabase {
 					"SELECT name, address1, address2, city, state, description FROM BREWERY WHERE %s", condition);
 			getResult(columns, sql);
 
-		} else {
+		} 
+		//Handler for all other cases
+		else {
 			for (int i = 0; i < attribute.length; i++) {
 				newName = name[i].replaceAll("'", "''");
 				if (i == 0)
@@ -146,13 +153,13 @@ public class SQLiteDatabase {
 				else
 					condition += String.format("and %s=='%s'", attribute[i], newName);
 			}
-			// System.out.println(condition);
 			String sql = String.format(
 					"SELECT name, address1, address2, city, state, description FROM BREWERY WHERE %s;", condition);
 			getResult(columns, sql);
 		}
 	}
 	
+	//This function will query for a brewery based upon a beer name 
 	public void breweryBeerNameSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
@@ -170,7 +177,8 @@ public class SQLiteDatabase {
 				+ "Brewery.state, Brewery.description FROM BREWERY JOIN BEER on Brewery.id == Beer.brewery_id WHERE %s;", condition);
 		getResult(columns, sql);
 	}
-
+	
+	//This function will return a list of beers made by a given brewery
 	public void beerBreweryNameSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
@@ -187,11 +195,14 @@ public class SQLiteDatabase {
 		getResult(columns, sql);
 
 	}
-
+	
+	//Queries based on beer search input 
 	public void beerSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
 		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Name", "ABV", "Description"));
+		
+		//Handler for if the user is searching by description key words
 		if (attribute[0].equals("desc")) {
 			for (int i = 0; i < name.length; i++) {
 				name[i].trim();
@@ -205,7 +216,14 @@ public class SQLiteDatabase {
 			String sql = String.format("SELECT name, abv, description FROM BEER WHERE %s", condition);
 			getResult(columns, sql);
 
-		} else if (attribute[0].equals("city") || attribute[0].equals("state")) {
+		} 
+		
+		//Handler if the user wants to look by city or state, or both
+		//Using JOIN clauses, as we need to see where the beer is brewed (in BREWERY table)
+		//All Beers made by all breweries in CITY and/or STATE is queried.
+		else if (attribute[0].equals("city") || attribute[0].equals("state")) {
+			
+			//Special case Handler if the user wants to search by CITY and STATE
 			if(attribute.length > 1) {
 				if(attribute[1].equals("state")) {
 					for (int i = 0; i < attribute.length; i++) {
@@ -223,6 +241,8 @@ public class SQLiteDatabase {
 				}
 				
 			}
+			
+			//generic CITY or STATE case
 			else {
 				for (int i = 0; i < name.length; i++) {
 					name[i].trim();
@@ -237,7 +257,10 @@ public class SQLiteDatabase {
 						condition);
 				getResult(columns, sql);
 			}
-		} else {
+		} 
+		
+		//Handler for all other cases
+		else {
 
 			for (int i = 0; i < attribute.length; i++) {
 				newName = name[i].replaceAll("'", "''");
@@ -250,7 +273,9 @@ public class SQLiteDatabase {
 			getResult(columns, sql);
 		}
 	}
-
+	
+	
+	//This function will determine which type of function should be used based on the TYPE string passed in.
 	public void complexSearch(String type, String[] attribute, String[] name) {
 		if (type.equals("beer"))
 			beerSearch(attribute, name);
@@ -264,6 +289,7 @@ public class SQLiteDatabase {
 		}
 	}
 	
+	//Handler for querying beers based on ABV
 	public void abvSearch(String tableName, String name) {
 		String sql;
 		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Beer Name", "ABV"));
