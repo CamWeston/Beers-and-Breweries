@@ -36,7 +36,7 @@ public class SQLiteDatabase {
 		commands.put("exit", "Exit the program");
 		commands.put("allbeers", "Return a list of all beers");
 		commands.put("allbreweries", "Return a list of all breweries");
-		commands.put("brewery beer name (beerName)", "Return brewery by a specific beer");
+		commands.put("brewery beername (beerName)", "Return brewery by a specific beer");
 		commands.put("brewery city (cityName)", "Return a list of all breweries by city name");
 		commands.put("brewery state (stateName)", "Return a list of all breweries by state name");
 		commands.put("brewery city (cityName)	state (stateName)",
@@ -152,6 +152,24 @@ public class SQLiteDatabase {
 			getResult(columns, sql);
 		}
 	}
+	
+	public void breweryBeerNameSearch(String[] attribute, String[] name) {
+		String condition = "";
+		String newName;
+		ArrayList<String> columns = new ArrayList<>(
+				Arrays.asList("Name", "Address 1", "Address 2", "City", "State", "Description"));
+		for (int i = 0; i < attribute.length; i++) {
+			newName = name[i].replaceAll("'", "''");
+			if (i == 0)
+				condition += String.format("Beer.%s=='%s'", attribute[i], newName);
+			else
+				condition += String.format("and Beer.%s=='%s'", attribute[i], newName);
+		}
+		String sql = String.format(
+				"SELECT Brewery.name, Brewery.address1, Brewery.address2, Brewery.city, "
+				+ "Brewery.state, Brewery.description FROM BREWERY JOIN BEER on Brewery.id == Beer.brewery_id WHERE %s;", condition);
+		getResult(columns, sql);
+	}
 
 	public void beerBreweryNameSearch(String[] attribute, String[] name) {
 		String condition = "";
@@ -239,8 +257,11 @@ public class SQLiteDatabase {
 		else if (type.equals("breweryname")) {
 			beerBreweryNameSearch(attribute, name);
 		}
+		else if(type.equals("beername")) {
+			breweryBeerNameSearch(attribute, name);
+		}
 	}
-
+	
 	public void abvSearch(String tableName, String name) {
 		String sql;
 		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Beer Name", "ABV"));
