@@ -78,18 +78,17 @@ public class SQLiteDatabase {
 
 	// Output all commands available to user
 	public void help() {
-		ArrayList<String> columns = new ArrayList<>(
-				Arrays.asList("Command", "Description"));
+		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Command", "Description"));
 		ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
 		ArrayList<String> row = new ArrayList<>();
 		for (Map.Entry<String, String> command : commands.entrySet()) {
-			row.addAll(Arrays.asList(command.getKey(),command.getValue()));
+			row.addAll(Arrays.asList(command.getKey(), command.getValue()));
 			rows.add(row);
 			row = new ArrayList<>();
 		}
-		printTable(columns,rows);
+		printTable(columns, rows);
 	}
-	
+
 	public void getResult(ArrayList<String> columns, String sql) {
 		final int columnCount = columns.size();
 		ArrayList<ArrayList<String>> rows = new ArrayList<ArrayList<String>>();
@@ -174,7 +173,7 @@ public class SQLiteDatabase {
 	public void beerSearch(String[] attribute, String[] name) {
 		String condition = "";
 		String newName;
-		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Name","ABV","Description"));
+		ArrayList<String> columns = new ArrayList<>(Arrays.asList("Name", "ABV", "Description"));
 		if (attribute[0].equals("desc")) {
 			for (int i = 0; i < name.length; i++) {
 				name[i].trim();
@@ -186,22 +185,39 @@ public class SQLiteDatabase {
 					condition += String.format("and %s LIKE '%s'", a, newName);
 			}
 			String sql = String.format("SELECT name, abv, description FROM BEER WHERE %s", condition);
-			getResult(columns,sql);
+			getResult(columns, sql);
 
-		}
-		else if (attribute[0].equals("city") || attribute[0].equals("state")) {
-			for (int i = 0; i < name.length; i++) {
-				name[i].trim();
-				newName = name[i].replaceAll("'", "''");
-				if (i == 0)
-					condition += String.format("Brewery.%s=='%s'", attribute[0], newName);
-				else
-					condition += String.format("and Brewery.%s=='%s'", attribute[0], newName);
+		} else if (attribute[0].equals("city") || attribute[0].equals("state")) {
+			if(attribute[1].equals("state")) {
+				for (int i = 0; i < attribute.length; i++) {
+					name[i].trim();
+					newName = name[i].replaceAll("'", "''");
+					if (i == 0)
+						condition += String.format("Brewery.%s=='%s'", attribute[i], newName);
+					else
+						condition += String.format("and Brewery.%s=='%s'", attribute[i], newName);
+				}
+				String sql = String.format(
+						"SELECT Beer.name, Beer.abv, Beer.description FROM BEER JOIN BREWERY ON Beer.brewery_id == Brewery.id WHERE %s",
+						condition);
+				getResult(columns, sql);
+				
 			}
-			String sql = String.format("SELECT Beer.name, Beer.abv, Beer.description FROM BEER JOIN BREWERY ON Beer.brewery_id == Brewery.id WHERE %s", condition);
-			getResult(columns,sql);
-		}
-		else {
+			else {
+				for (int i = 0; i < name.length; i++) {
+					name[i].trim();
+					newName = name[i].replaceAll("'", "''");
+					if (i == 0)
+						condition += String.format("Brewery.%s=='%s'", attribute[0], newName);
+					else
+						condition += String.format("and Brewery.%s=='%s'", attribute[0], newName);
+				}
+				String sql = String.format(
+						"SELECT Beer.name, Beer.abv, Beer.description FROM BEER JOIN BREWERY ON Beer.brewery_id == Brewery.id WHERE %s",
+						condition);
+				getResult(columns, sql);
+			}
+		} else {
 
 			for (int i = 0; i < attribute.length; i++) {
 				newName = name[i].replaceAll("'", "''");
@@ -211,7 +227,7 @@ public class SQLiteDatabase {
 					condition += String.format("and %s=='%s'", attribute[i], newName);
 			}
 			String sql = String.format("SELECT name, abv, description FROM BEER " + "WHERE %s", condition);
-			getResult(columns,sql);
+			getResult(columns, sql);
 		}
 	}
 
